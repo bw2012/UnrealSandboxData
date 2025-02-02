@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1",
+	"FriendlyName": "UnrealSandboxData",
+	"Description": "Persistent data structures",
+	"Category": "Other",
+	"CreatedBy": "dd2012",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "UnrealSandboxData",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
