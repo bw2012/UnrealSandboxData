@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine.h"
 #include "Modules/ModuleManager.h"
 #include <vector>
 #include <memory>
@@ -17,6 +18,11 @@ public:
 };
 
 
+typedef std::vector<uint8> TData;
+typedef std::shared_ptr<TData> TDataPtr;
+
+
+// приходится так иначе линкер не собирает
 
 UNREALSANDBOXDATA_API int32 KvdbOpen(std::string File);
 
@@ -24,13 +30,15 @@ UNREALSANDBOXDATA_API void KvdbCreate(std::string file, uint32 max_key_size);
 
 UNREALSANDBOXDATA_API void KvdbClose(int32 file_id);
 
-UNREALSANDBOXDATA_API bool KvdbHasKey(int32 file_id, const std::vector<unsigned char>& key);
+UNREALSANDBOXDATA_API bool KvdbHasKey(int32 file_id, const std::vector<uint8>& key);
 
-UNREALSANDBOXDATA_API std::shared_ptr<std::vector<uint8>> KvdbLoadData(int32 file_id, const std::vector<unsigned char>& key);
+UNREALSANDBOXDATA_API std::shared_ptr<std::vector<uint8>> KvdbLoadData(int32 file_id, const std::vector<uint8>& key);
 
-UNREALSANDBOXDATA_API void KvdbSaveData(int32 file_id, const std::vector<unsigned char>& key, const std::vector<unsigned char>& data, uint64 flags);
+UNREALSANDBOXDATA_API void KvdbSaveData(int32 file_id, const std::vector<uint8>& key, const std::vector<uint8>& data, uint64 flags);
 
-UNREALSANDBOXDATA_API uint64 KvdbGetKeyFlags(int32 file_id, const std::vector<unsigned char>& key);
+UNREALSANDBOXDATA_API uint64 KvdbGetKeyFlags(int32 file_id, const std::vector<uint8>& key);
+
+UNREALSANDBOXDATA_API void KvdbGetAllKeys(int32 file_id, std::vector<std::vector<uint8>>& keys);
 
 
 #define TO_BYTES(P) std::vector<uint8> ba(sizeof(P)); std::fill(ba.begin(), ba.end(), 0); std::memcpy(ba.data(), &P, sizeof(P)); 
@@ -51,7 +59,9 @@ public:
 	}
 
 	static void Close(int32 Fid) {
-		KvdbClose(Fid);
+		if (Fid > 0) {
+			KvdbClose(Fid);
+		}
 	}
 
 	template<typename K>
@@ -78,6 +88,18 @@ public:
 		return KvdbGetKeyFlags(Fid, ba);
 	}
 
+	template<typename K>
+	static void GetAllKeys(int32 Fid, TArray<K>& Out) {
+		std::vector<std::vector<uint8>> keys;
+		KvdbGetAllKeys(Fid, keys);
+
+		for (const auto kd : keys) {
+			K Key;
+			std::memcpy(&Key, kd.data(), sizeof(K));
+			Out.Add(Key);
+		}
+	}
+
 };
 
 
@@ -89,4 +111,9 @@ public:
 
 	static uint64 DecodeBase36(FString Str);
 
+	static TData ConvertStringToData(FString Str);
+
+	static TMap<FString, FString> ConvertStrToMap(const FString& Str);
+
+	static TMap<FString, float> ConvertStrToFloatMap(const FString& Str);
 };

@@ -508,6 +508,12 @@ namespace kvdb {
 			}
 		}
 
+		void forEachKey(std::function<void(const TKeyData& key)> func) const {
+			if (!isOpen()) return;
+			std::lock_guard<std::mutex> guard(fileSharedMutex);
+			for (const auto& kv : dataMap) { func(kv.first); }
+		}
+
 		// ====================================================================================
 		
 		size_t reserved() const {
